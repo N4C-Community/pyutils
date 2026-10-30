@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyutils-n4c"
+version = "0.1.0"
+description = "Custom utils from n4c"
+readme = "README.md"
+requires-python = ">=3.7"
+authors = [
+    { name = "RAPLI-DEV" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
