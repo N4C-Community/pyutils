@@ -74,6 +74,8 @@ def _bg(index: int) -> str:
         raise ValueError("index must be 0..255")
     return f"\033[48;5;{index}m" if _ANSI else ""
 
+def _cursor(sequence: str) -> str:
+    return f"\033[{sequence}" if _ANSI else ""
 
 def _validate_rgb(r: int, g: int, b: int) -> None:
     for name, value in (("r", r), ("g", g), ("b", b)):
@@ -122,7 +124,7 @@ class styles:
     YELLOW = _code("93")
     BLUE = _code("94")
     FUCHSIA = _code("95")
-    AQUA = _code("96")
+    CYAN = _code("96")
     WHITE = _code("97")
 
     # Background standard 16
@@ -140,7 +142,7 @@ class styles:
     BG_YELLOW = _code("103")
     BG_BLUE = _code("104")
     BG_FUCHSIA = _code("105")
-    BG_AQUA = _code("106")
+    BG_CYAN = _code("106")
     BG_WHITE = _code("107")
 
     # Alias bright
@@ -150,7 +152,6 @@ class styles:
     BRIGHT_YELLOW = YELLOW
     BRIGHT_BLUE = BLUE
     BRIGHT_MAGENTA = FUCHSIA
-    BRIGHT_CYAN = AQUA
     BRIGHT_WHITE = WHITE
 
     @staticmethod
@@ -170,3 +171,19 @@ class styles:
     def bg_rgb(r: int, g: int, b: int) -> str:
         _validate_rgb(r, g, b)
         return f"\033[48;2;{r};{g};{b}m" if _ANSI else ""
+
+    @staticmethod
+    def hide_cursor() -> None:
+        """Menyembunyikan kursor CLI jika terminal mendukung ANSI."""
+        cmd = _cursor("?25l")
+        if cmd:
+            sys.__stdout__.write(cmd)
+            sys.__stdout__.flush()
+
+    @staticmethod
+    def show_cursor() -> None:
+        """Menampilkan kursor CLI kembali jika terminal mendukung ANSI."""
+        cmd = _cursor("?25h")
+        if cmd:
+            sys.__stdout__.write(cmd)
+            sys.__stdout__.flush()
