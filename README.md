@@ -1,6 +1,6 @@
 <div align="center">
 
-# py-utils
+# pyutils
 
 <p align="center">custom utils from n4c</p>
 
@@ -17,7 +17,7 @@
 - git v2.54+
 
 ## Installation
-
+### Source Code
 ```bash
 git clone https://github.com/N4C-Community/pyutils.git
 cd ./pyutils
@@ -29,6 +29,11 @@ source .venv/bin/activate   # if your using linux
 .\.venv\Scripts\Activate.ps1    # if your using powershell / powershell7
 
 pip install -r requirements.txt
+```
+
+### PIP Package
+```bash
+pip install pyutils-n4c
 ```
 
 ## Optional Usage (for development)
