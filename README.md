@@ -49,7 +49,8 @@ Distributed under the GPL-3.0 License. See `LICENSE` for more information.
 
 ## Contact
 
-- GitHub: [@ITB-Asia-Community](https://github.com/N4C-Community)
+- GitHub: [@N4C-Community](https://github.com/N4C-Community)
+- GitHub: [@RAPLI-DEV](https://github.com/RAPLI-DEV)
 - Email: [rdp123szschirylw@gmail.com](mailto:rdp123szschirylw@gmail.com)
 - Email: [nusa4code@gmail.com](mailto:nusa4code@gmail.com)
 
