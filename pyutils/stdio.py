@@ -33,11 +33,12 @@ class stdio:
             f"{start}{colorP}{prompt}{styles.WHITE} {colorM}{msg}>{colorIn} "
         )
         sys.__stdout__.flush()
-        i = sys.__stdin__.readline().rstrip("\r\n")
-        sys.__stdout__.write(end)
-        sys.__stdout__.flush()
-        sys.__stdout__.write(styles.RESET)
-        return i
+        try:
+            return sys.__stdin__.readline().rstrip("\r\n")
+        finally:
+            sys.__stdout__.write(end)
+            sys.__stdout__.flush()
+            sys.__stdout__.write(styles.RESET)
 
     @staticmethod
     def out(
@@ -87,6 +88,12 @@ class stdio:
         sys.__stdout__.flush()
         sys.__stdout__.write(styles.RESET)
 
+    @classmethod
+    def clearln(cls) -> None:
+        sys.__stdout__.write("\x1b[2K")
+        sys.__stdout__.flush()
+        sys.__stdout__.write(styles.RESET)
+
     @staticmethod
     def copyright() -> None:
         sys.__stdout__.write(
@@ -95,39 +102,51 @@ class stdio:
 
     @classmethod
     def _spin(
-        cls, msgL: str = "Loading...", stop_event: threading.Event = None
+        cls,
+        stop_event: threading.Event = None,
+        msgL: str = "Loading...",
+        msgS: str = "Done",
+        msgF: str = "Fail",
     ) -> None:
         if stop_event is None:
             stop_event = threading.Event()
-            _s = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
-            try:
-                while not stop_event.is_set():
-                    for i in _s:
-                        if stop_event.is_set():
-                            break
-                        cls.clear()
-                        styles.hide_cursor()
-                        cls.out(
-                            i,
-                            prompt=msgL,
-                            end="",
-                            colorP=styles.GREY,
-                            colorM=styles.CYAN,
-                        )
-                        sys.__stdout__.flush()
-                        time.sleep(0.025)
-            except Exception:
-                cls.out("Fail", prompt="✘ ", colorP=styles.RED)
-            finally:
-                styles.show_cursor()
-                cls.out("Done", prompt="✔ ", colorP=styles.GREEN)
-                sys.__stdout__.flush()
+        _s = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+        try:
+            while not stop_event.is_set():
+                for i in _s:
+                    if stop_event.is_set():
+                        break
+                    styles.hide_cursor()
+                    cls.out(
+                        i,
+                        prompt=f"{msgL} ",
+                        start="\r\x1b[2K",
+                        end="",
+                        colorP=styles.GREY,
+                        colorM=styles.CYAN,
+                    )
+                    sys.__stdout__.flush()
+                    time.sleep(0.025)
+        except Exception:
+            cls.out(msgF, prompt="✘ ", start="\r\x1b[2K", colorP=styles.RED)
+        finally:
+            styles.show_cursor()
+            cls.out(msgS, prompt="✔ ", start="\r\x1b[2K", colorP=styles.GREEN)
+            sys.__stdout__.flush()
 
     @classmethod
-    def loading(cls, func, msgL: str = "Loading... "):
+    def loading(
+        cls,
+        func,
+        msgL: str = "Loading... ",
+        msgS: str = "Done",
+        msgF: str = "Fail",
+    ):
         stop = threading.Event()
         t = threading.Thread(
-            target=cls._spin, kwargs={"msgL": msgL, "stop_event": stop}, daemon=True
+            target=cls._spin,
+            kwargs={"msgL": msgL, "msgS": msgS, "msgF": msgF, "stop_event": stop},
+            daemon=True,
         )
         t.start()
         try:
@@ -135,3 +154,44 @@ class stdio:
         finally:
             stop.set()
             t.join()
+
+    def readkey() -> str:
+        try:
+            import msvcrt
+
+            ch = msvcrt.getwch()
+            if ch in ("\x00", "\xe0"):
+                return {"H": "up", "P": "down", "K": "left", "M": "right"}.get(
+                    msvcrt.getwch(), ""
+                )  # return key down | up | right | left string
+            if ch == "\r":
+                return "enter"  # return enter string
+            if ch == "\x1b":
+                return "esc"  # return esc string
+            if ch == "b'\r'":
+                return "enter"  # return enter string
+            if ch == "\x03":
+                raise KeyboardInterrupt
+            return ch.lower()
+        except ImportError:
+            # DEVELOPMENT FOR LINUX
+            import termios, tty, select
+
+            fd = sys.stdin.fileno()
+            old = termios.tcgetattr(fd)
+            try:
+                tty.setraw(fd)
+                ch = sys.stdin.read(1)
+                if ch == "\x1b":
+                    r, _, _ = select.select([sys.stdin], [], [], 0.05)
+                    if not r:
+                        return "esc"
+                    seq = sys.stdin.read(2)
+                    return {"[A": "up", "[B": "down", "[D": "left", "[C": "right"}.get(
+                        seq, "esc"
+                    )
+                if ch in ("\r", "\n"):
+                    return "enter"
+                return ch.lower()
+            finally:
+                termios.tcsetattr(fd, termios.TCSADRAIN, old)

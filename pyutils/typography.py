@@ -74,8 +74,10 @@ def _bg(index: int) -> str:
         raise ValueError("index must be 0..255")
     return f"\033[48;5;{index}m" if _ANSI else ""
 
+
 def _cursor(sequence: str) -> str:
     return f"\033[{sequence}" if _ANSI else ""
+
 
 def _validate_rgb(r: int, g: int, b: int) -> None:
     for name, value in (("r", r), ("g", g), ("b", b)):
@@ -100,8 +102,8 @@ class styles:
     STRIKETHROUGH = _code("9")
 
     # Reset styles
-    RESET_BOLD = _code("22")   # also resets DIM
-    RESET_DIM = _code("22")    # also resets BOLD
+    RESET_BOLD = _code("22")  # also resets DIM
+    RESET_DIM = _code("22")  # also resets BOLD
     RESET_ITALIC = _code("23")
     RESET_UNDERLINE = _code("24")
     RESET_BLINK = _code("25")
