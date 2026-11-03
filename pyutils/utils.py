@@ -16,7 +16,7 @@
 
 import sys
 from .stdio import stdio
-from .typography import styles
+from .char import ansii
 
 
 class feat:
@@ -60,7 +60,7 @@ class feat:
         if not option:
             return {}
 
-        width = feat.width(title, option, pad)  # ← argumen dibetulkan
+        width = feat.width(title, option, pad)
         if (width - len(f" {title} ")) % 2:
             width += 1
 
@@ -80,7 +80,7 @@ class feat:
         height = 0
 
         try:
-            styles.hide_cursor()
+            sys.__stdout__.write(ansii.CURSOR_HIDE)
             sys.__stdout__.flush()
 
             while True:
@@ -111,5 +111,5 @@ class feat:
                             idx = k
                             break
         finally:
-            styles.show_cursor()
+            sys.__stdout__.write(ansii.CURSOR_SHOW)
             sys.__stdout__.flush()
